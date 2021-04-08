@@ -2,12 +2,11 @@ const path = require('path');
 const HTMLWebpackPlugin = require("html-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin'); // 그냥 복붙 해서 사용
-const TerserPlugin = require("terser-webpack-plugin");//기본이 터서 사용이기 때문에 
+const webpack = require("webpack")
 
 
+const isProduction = process.env.NODE_ENV === 'PRODUCTION'
 module.exports = {
-    mode:'production',
     entry:"./src/index.js",
     output:{
         path:path.resolve(__dirname, 'build'),
@@ -21,12 +20,6 @@ module.exports = {
                     {
                         loader:MiniCssExtractPlugin.loader // style-loader를 대체 한다.
                     },
-                    // {
-                    //     loader:'style-loader',
-                    //     options:{
-                    //         injectType:'singletonStyleTag' //tag를 하나로 함칠 수 있다
-                    //     }
-                    // },
                     {
                         loader:'css-loader',
                         options:{
@@ -50,40 +43,16 @@ module.exports = {
             meta:{
                 viewport:"width=device-width, initial-scale=1.0"
             },
-            minify:{
+            minify:isProduction ? {
                 collapseWhitespace:true,
                 removeComments:true,
                 useShortDoctype:true,
                 removeScriptTypeAttributes:true
-            }
+            } : false
         }),
         new CleanWebpackPlugin(),
-        new OptimizeCssAssetsPlugin({
-            assetNameRegExp: /\.css$/g,
-            cssProcessor: require('cssnano'),
-            cssProcessorPluginOptions: {
-                preset: ['default', { discardComments: { removeAll: true } }],
-            },
-            canPrint: true
-        })
+        new webpack.DefinePlugin({
+            IS_PRODUCTION:isProduction
+        })//전역 상수 값을 정의해서 사용할 수 있습니다.
     ],
-    optimization:{
-        runtimeChunk:{
-            name:'runtime'
-        },
-        splitChunks:{
-            cacheGroups:{
-                defaultVendors:{
-                    test:/[\\/]node_modules[\\/]/i,
-                    chunks: 'all',
-                    name:'vender'
-                }
-            }
-        },
-        minimize:true,// TerserWebpackPlugin
-        minimizer:[new TerserPlugin({
-            
-        })] //uglyfi나 다른거를 사용하려면 여기에 터서말고 다른거 넣어 주면됩니다.
-    }
-    
 }
