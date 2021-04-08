@@ -1,6 +1,7 @@
 const path = require('path');
 const HTMLWebpackPlugin = require("html-webpack-plugin")
 
+
 module.exports = {
     mode:'development',
     entry:"./src/index.js",
@@ -26,12 +27,20 @@ module.exports = {
                         }
                     }
                 ]
+            },{
+                test:/\.hbs/i,
+                use:['handlebars-loader']
             }
         ]
     },
     plugins:[
         new HTMLWebpackPlugin({
-            template:path.resolve(__dirname,'index.html') //트정파일 기준으로 html파일 생성
+            title:'Hello World',
+            template:path.resolve(__dirname,'index.hbs'), //트정파일 기준으로 html파일 생성
+            meta:{
+                viewport:"width=device-width, initial-scale=1.0"
+            }
+
         })
     ]
     
